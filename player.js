@@ -20,6 +20,7 @@ player.grounded = true;
 player.animationTime = 0;
 }
 
+
 export function jumpPlayer(player) {
 player.velocity = JUMP_STRENGTH;
 player.grounded = false;
