@@ -47,6 +47,8 @@ hard: 0.12
 const SHIELD_SIZE = 24;
 const SHIELD_INVULNERABILITY_FRAMES = 90;
 const COIN_SIZE = 20;
+const COIN_MIN_X_OFFSET = 30;
+const COIN_MAX_X_OFFSET = 150;
 const player = createPlayer(canvas.height);
 const buildings = [];
 const confetti = [];
@@ -317,10 +319,13 @@ size: SHIELD_SIZE
 }
 
 function spawnCoin(building) {
+const xOffset =
+  COIN_MIN_X_OFFSET + Math.random() * (COIN_MAX_X_OFFSET - COIN_MIN_X_OFFSET);
 coinPickups.push({
 building,
-x: building.x - 40,
-y: canvas.height - 55,
+x: building.x - xOffset,
+y: COIN_SIZE / 2 + Math.random() * (canvas.height - COIN_SIZE),
+xOffset,
 size: COIN_SIZE
 });
 }
@@ -364,8 +369,7 @@ coinPickups.splice(index, 1);
 continue;
 }
 
-coin.x = coin.building.x - 40;
-coin.y = canvas.height - 55;
+coin.x = coin.building.x - coin.xOffset;
 const left = coin.x - coin.size / 2;
 const top = coin.y - coin.size / 2;
 const overlapsPlayer =
