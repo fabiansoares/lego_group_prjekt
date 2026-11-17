@@ -289,6 +289,9 @@ padding: 16px;
 top: 50px;
 right: 10px;
 }
+#start-screen[hidden] ~ #music-toggle {
+top: 112px;
+}
 .game-layout {
 flex-direction: column;
 gap: 16px;
