@@ -1,9 +1,32 @@
-const MIN_BUILDING_SPEED = 2;
-const MAX_BUILDING_SPEED = 6;
-const BUILDING_GAP_HEIGHT = 170;
 const MIN_GAP_TOP_POSITION = 0.08;
 const MAX_GAP_TOP_POSITION = 0.6;
 const MIN_GAP_POSITION_DIFFERENCE = 0.24;
+const DIFFICULTY_SETTINGS = {
+easy: {
+  minSpeed: 1.5,
+  maxSpeed: 3.5,
+  gapHeight: 200,
+  movingGapChance: 0.15,
+  movingGapRange: 34,
+  movingGapSpeed: 0.45
+},
+normal: {
+  minSpeed: 2,
+  maxSpeed: 6,
+  gapHeight: 170,
+  movingGapChance: 0.35,
+  movingGapRange: 44,
+  movingGapSpeed: 0.7
+},
+hard: {
+  minSpeed: 3.5,
+  maxSpeed: 7.5,
+  gapHeight: 140,
+  movingGapChance: 0.55,
+  movingGapRange: 55,
+  movingGapSpeed: 1
+}
+};
 const ROOF_STYLES = ["gable", "flat"];
 const BODY_COLORS = ["#ef4444", "#f4c430", "#168bd2", "#36a852", "#f28c28"];
 const ROOF_COLORS = ["#d62828", "#2255aa", "#e5a900", "#258341"];
@@ -69,23 +92,34 @@ ctx.stroke();
 }
 }
 
-export function createBuilding(x, previousBuilding) {
+export function createBuilding(x, previousBuilding, moving = false, difficulty = "normal") {
+const settings = DIFFICULTY_SETTINGS[difficulty];
 const width = 64 + Math.floor(Math.random() * 33);
 const roofStyle = randomItem(ROOF_STYLES);
+const roofHeight = roofStyle === "gable" ? 25 + Math.floor(Math.random() * 16) : 14;
+const maxGapTopPosition = Math.min(
+  MAX_GAP_TOP_POSITION,
+  (600 - settings.gapHeight - 40 - 8) / 600
+);
 
 return {
 x,
 width,
-speed: MIN_BUILDING_SPEED + Math.random() * (MAX_BUILDING_SPEED - MIN_BUILDING_SPEED),
+speed: settings.minSpeed + Math.random() * (settings.maxSpeed - settings.minSpeed),
+moving,
+gapOffset: 0,
+gapDirection: Math.random() < 0.5 ? -1 : 1,
+movingGapRange: settings.movingGapRange,
+movingGapSpeed: settings.movingGapSpeed,
 gapTopPosition: randomGapPosition(
   previousBuilding?.gapTopPosition,
   MIN_GAP_TOP_POSITION,
-  MAX_GAP_TOP_POSITION,
+  maxGapTopPosition,
   MIN_GAP_POSITION_DIFFERENCE
 ),
-gapHeight: BUILDING_GAP_HEIGHT,
+gapHeight: settings.gapHeight,
 roofStyle,
-roofHeight: roofStyle === "gable" ? 25 + Math.floor(Math.random() * 16) : 14,
+roofHeight,
 bodyColor: randomItem(BODY_COLORS),
 hangingColor: randomItem(BODY_COLORS),
 roofColor: randomItem(ROOF_COLORS),
@@ -97,7 +131,7 @@ passed: false
 }
 
 function getBuildingGeometry(building, canvasHeight) {
-const gapTop = canvasHeight * building.gapTopPosition;
+const gapTop = canvasHeight * building.gapTopPosition + building.gapOffset;
 const gapBottom = gapTop + building.gapHeight;
 return {
 gapTop,
@@ -197,11 +231,33 @@ drawBuilding(ctx, building, canvasHeight);
 }
 }
 
-export function updateBuildings(buildings, player, canvasWidth, canvasHeight) {
+export function updateBuildings(
+  buildings,
+  player,
+  canvasWidth,
+  canvasHeight,
+  level = 0,
+  difficulty = "normal"
+) {
 let passed = 0;
 let collided = false;
+const settings = DIFFICULTY_SETTINGS[difficulty];
 
 for (const building of buildings) {
+if (building.moving) {
+const baseGapTop = canvasHeight * building.gapTopPosition;
+const minOffset = Math.max(-building.movingGapRange, 12 - baseGapTop);
+const maxOffset = Math.min(
+  building.movingGapRange,
+  canvasHeight - building.gapHeight - building.roofHeight - 8 - baseGapTop
+);
+building.gapOffset += building.gapDirection * building.movingGapSpeed;
+if (building.gapOffset <= minOffset || building.gapOffset >= maxOffset) {
+building.gapOffset = Math.max(minOffset, Math.min(maxOffset, building.gapOffset));
+building.gapDirection *= -1;
+}
+}
+
 building.x -= building.speed;
 
 if (!building.passed && building.x + building.width < player.x) {
@@ -230,7 +286,9 @@ const lastBuilding = buildings[buildings.length - 1];
 if (lastBuilding && lastBuilding.x < canvasWidth - 220) {
 buildings.push(createBuilding(
   canvasWidth + 260 + Math.random() * 140,
-  lastBuilding
+  lastBuilding,
+  level + passed >= 15 && Math.random() < settings.movingGapChance,
+  difficulty
 ));
 }
 

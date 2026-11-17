@@ -7,7 +7,48 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<main class="game-layout">
+<div class="game-container">
 <canvas id="game" width="400" height="600"></canvas>
+<section id="start-screen" class="start-screen" aria-labelledby="start-title">
+<h1 id="start-title">LEGO Building Run</h1>
+<p id="start-message">Choose a difficulty to start</p>
+<form id="score-form" hidden>
+<label for="player-name">Enter your name for the leaderboard</label>
+<div class="score-form-fields">
+<input id="player-name" name="player-name" maxlength="20" required autocomplete="nickname">
+<button id="submit-score" type="submit" disabled>Submit score</button>
+</div>
+</form>
+<div class="difficulty-buttons">
+<button type="button" class="difficulty-button" data-difficulty="easy">Easy</button>
+<button type="button" class="difficulty-button" data-difficulty="normal">Normal</button>
+<button type="button" class="difficulty-button" data-difficulty="hard">Hard</button>
+</div>
+<button id="skin-shop-toggle" class="skin-shop-toggle" type="button" aria-expanded="false" aria-controls="skin-shop">
+Skin shop - 0 coins
+</button>
+<section id="skin-shop" class="skin-shop" aria-labelledby="skin-shop-title" hidden>
+<h2 id="skin-shop-title">Player skins</h2>
+<p>Coins: <strong id="shop-coin-balance">0</strong></p>
+<div id="skin-items"></div>
+<p id="skin-shop-status" role="status" aria-live="polite">Collect coins during a run to unlock skins.</p>
+</section>
+<section class="start-leaderboard" aria-labelledby="start-leaderboard-title">
+<h2 id="start-leaderboard-title">World top five</h2>
+<ol id="start-leaderboard-list"></ol>
+<p id="start-leaderboard-status" role="status" aria-live="polite">Loading scores...</p>
+</section>
+</section>
+<button id="music-toggle" type="button" aria-pressed="true">Music: On</button>
+<button id="pause" type="button" aria-pressed="false">Pause</button>
+</div>
+<aside class="leaderboard-panel" aria-labelledby="leaderboard-title">
+<h1 id="leaderboard-title">World leaderboard</h1>
+<ol id="leaderboard-list"></ol>
+<p id="leaderboard-status" role="status" aria-live="polite">Loading scores...</p>
+</aside>
+</main>
 <script type="module" src="game.js"></script>
 </body>
 </html>
