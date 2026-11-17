@@ -285,6 +285,10 @@ body {
 box-sizing: border-box;
 padding: 16px;
 }
+#music-toggle {
+top: 50px;
+right: 10px;
+}
 .game-layout {
 flex-direction: column;
 gap: 16px;
