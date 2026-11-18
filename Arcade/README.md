@@ -2,6 +2,10 @@
 
 Pixel Palace is a retro-inspired browser arcade with five games. It is built with HTML, CSS, and JavaScript and works on desktop and mobile browsers.
 
+## Home page
+
+![Screenshot of the Pixel Palace home page](homepage.png)
+
 ## Games
 
 | Game | Description |
