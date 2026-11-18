@@ -1,0 +1,9 @@
+arcade/
+├── index.html ← the arcade home page
+├── style.css ← styles for the home page
+├── tap-game/
+│ ├── index.html
+│ ├── style.css
+│ └── game.js
+├── memory/ ← your next game
+└── reaction/ ← and another one

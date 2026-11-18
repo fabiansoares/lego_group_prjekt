@@ -49,6 +49,11 @@ const SHIELD_INVULNERABILITY_FRAMES = 90;
 const COIN_SIZE = 20;
 const COIN_MIN_X_OFFSET = 30;
 const COIN_MAX_X_OFFSET = 150;
+const DIFFICULTY_LABELS = new Map([
+["easy", "Easy"],
+["normal", "Normal"],
+["hard", "Hard"]
+]);
 const player = createPlayer(canvas.height);
 const buildings = [];
 const confetti = [];
@@ -119,7 +124,11 @@ const name = document.createElement("span");
 name.textContent = entry.player_name;
 const scoreValue = document.createElement("strong");
 scoreValue.textContent = String(entry.score);
-row.append(name, scoreValue);
+name.className = "leaderboard-player";
+const difficultyValue = document.createElement("span");
+difficultyValue.className = "leaderboard-difficulty";
+difficultyValue.textContent = `Difficulty: ${DIFFICULTY_LABELS.get(entry.difficulty) || "Unknown"}`;
+row.append(name, difficultyValue, scoreValue);
 list.append(row);
 }
 }
@@ -192,7 +201,7 @@ if (!gameOver || !isLeaderboardConfigured() || scoreSubmitted) return;
 submitScoreButton.disabled = true;
 setLeaderboardStatus("Submitting your score...");
 try {
-await submitScore(playerNameInput.value, score);
+await submitScore(playerNameInput.value, score, difficulty);
 scoreSubmitted = true;
 } catch (error) {
 setLeaderboardStatus(`Couldn't submit score: ${errorMessage(error)}`, true);

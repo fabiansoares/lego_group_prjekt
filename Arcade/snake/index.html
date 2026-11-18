@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#111026">
+    <meta name="description" content="Play Snake at Pixel Palace. Eat, grow, and avoid the walls.">
+    <title>Snake — Pixel Palace</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="game.js" defer></script>
+  </head>
+  <body>
+    <a class="back-to-arcade" href="../index.html">← Back to arcade</a>
+    <main class="snake-page">
+      <header class="game-header">
+        <p class="eyebrow">PIXEL PALACE · GAME 04</p>
+        <h1>Snake</h1>
+        <p class="instructions">Eat the food and grow. Avoid the walls and your own tail!</p>
+      </header>
+
+      <section class="game-panel" aria-label="Snake game">
+        <div class="game-toolbar">
+          <p class="score-label">Score <strong id="score">0</strong></p>
+          <p class="score-label">Best <strong id="best-score">0</strong></p>
+          <button id="restart" class="restart-button" type="button">Restart</button>
+          <button id="music-toggle" class="music-toggle" type="button" aria-pressed="true">Music: On</button>
+        </div>
+        <div class="board-wrap">
+          <canvas
+            id="game-board"
+            width="400"
+            height="400"
+            tabindex="0"
+            role="img"
+            aria-label="Snake game board"
+            aria-describedby="game-status"
+          ></canvas>
+          <div id="game-overlay" class="game-overlay">
+            <p id="overlay-label" class="eyebrow">READY?</p>
+            <h2 id="overlay-title">Snake</h2>
+            <p id="overlay-message">Use arrow keys or swipe to eat food and grow.</p>
+            <button id="start-game" class="start-button" type="button">Start game</button>
+          </div>
+        </div>
+        <p id="game-status" class="game-status" role="status" aria-live="polite">
+          Use arrow keys or swipe on the board to steer.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

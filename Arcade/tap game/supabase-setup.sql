@@ -3,8 +3,13 @@ create table if not exists public.leaderboard_scores (
   player_name text not null
     check (char_length(btrim(player_name)) between 1 and 20),
   score integer not null check (score between 0 and 1000000),
+  difficulty text check (difficulty in ('easy', 'normal', 'hard')),
   created_at timestamptz not null default now()
 );
+
+alter table public.leaderboard_scores
+  add column if not exists difficulty text
+    check (difficulty in ('easy', 'normal', 'hard'));
 
 create index if not exists leaderboard_scores_rank_idx
   on public.leaderboard_scores (score desc, created_at asc);
@@ -28,6 +33,7 @@ create policy leaderboard_scores_public_insert
   with check (
     char_length(btrim(player_name)) between 1 and 20
     and score between 0 and 1000000
+    and difficulty in ('easy', 'normal', 'hard')
   );
 
 grant select, insert on public.leaderboard_scores to anon, authenticated;

@@ -1,0 +1,127 @@
+:root {
+  color-scheme: dark;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  color: #fff;
+  background: #d93448;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  min-height: 100svh;
+  margin: 0;
+  background: #d93448;
+  transition: background-color 140ms ease;
+}
+
+body[data-state="go"],
+body[data-state="result"] {
+  background: #179454;
+}
+
+.back-to-arcade {
+  position: fixed;
+  z-index: 1;
+  top: 16px;
+  left: 16px;
+  padding: 9px 12px;
+  border: 1px solid rgb(255 255 255 / 55%);
+  border-radius: 5px;
+  background: transparent;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.back-to-arcade:hover {
+  background: transparent;
+}
+
+.back-to-arcade:focus-visible,
+.game-surface:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: -6px;
+}
+
+main {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+.game-surface {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 88px 24px 48px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.game-title {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-shadow: 0 2px 8px rgb(0 0 0 / 16%);
+}
+
+.game-message {
+  font-size: clamp(36px, 9vw, 76px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  text-shadow: 0 4px 16px rgb(0 0 0 / 18%);
+}
+
+.best-time {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.game-hint {
+  max-width: 430px;
+  font-size: 16px;
+  line-height: 1.5;
+  text-shadow: 0 1px 5px rgb(0 0 0 / 15%);
+}
+
+@media (max-width: 480px) {
+  .back-to-arcade {
+    top: 12px;
+    left: 12px;
+  }
+
+  .game-surface {
+    gap: 16px;
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
+  .game-hint {
+    max-width: 300px;
+    font-size: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
+}

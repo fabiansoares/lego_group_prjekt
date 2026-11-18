@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#d93448">
+    <meta name="description" content="Test your reflexes in Reaction Rush at Pixel Palace.">
+    <title>Reaction Rush — Pixel Palace</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="game.js" defer></script>
+  </head>
+  <body data-state="ready">
+    <a class="back-to-arcade" href="../index.html">← Back to arcade</a>
+    <main>
+      <button id="game-surface" class="game-surface" type="button" data-state="ready">
+        <span class="game-title">REACTION RUSH</span>
+        <span id="game-message" class="game-message" aria-live="polite" aria-atomic="true">Tap to start</span>
+        <span id="best-time" class="best-time" aria-live="polite" aria-atomic="true">Best: —</span>
+        <span id="game-hint" class="game-hint">The screen turns green after a random delay. Tap as fast as you can!</span>
+      </button>
+    </main>
+  </body>
+</html>

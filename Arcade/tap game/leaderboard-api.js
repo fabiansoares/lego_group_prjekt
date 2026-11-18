@@ -27,7 +27,7 @@ return response;
 
 export async function getTopScores() {
 const query = new URLSearchParams({
-select: "player_name,score",
+select: "player_name,score,difficulty",
 order: "score.desc,created_at.asc",
 limit: "5"
 });
@@ -42,13 +42,16 @@ throw new Error("Leaderboard returned an invalid score list.");
 return scores;
 }
 
-export async function submitScore(playerName, score) {
+export async function submitScore(playerName, score, difficulty) {
 const normalizedName = playerName.trim();
 if (normalizedName.length < 1 || normalizedName.length > 20) {
 throw new Error("Player name must be between 1 and 20 characters.");
 }
 if (!Number.isSafeInteger(score) || score < 0 || score > 1000000) {
 throw new Error("Score must be a whole number between 0 and 1,000,000.");
+}
+if (!["easy", "normal", "hard"].includes(difficulty)) {
+throw new Error("Difficulty must be easy, normal, or hard.");
 }
 
 const response = await fetch(getScoresUrl(), {
@@ -57,7 +60,7 @@ headers: getHeaders({
   "Content-Type": "application/json",
   Prefer: "return=minimal"
 }),
-body: JSON.stringify({ player_name: normalizedName, score })
+body: JSON.stringify({ player_name: normalizedName, score, difficulty })
 });
 await checkResponse(response);
 }
