@@ -230,6 +230,17 @@ p {
   background: linear-gradient(135deg, #4a245f, #83428e 58%, #d45983);
 }
 
+.card-art--platformer {
+  background: linear-gradient(135deg, #10264f, #2359a8 58%, #54a9d8);
+}
+
+.card-art--platformer .art-icon {
+  color: var(--cyan);
+  font-size: 82px;
+  text-shadow: 5px 5px 0 rgb(17 16 38 / 45%), 0 0 24px rgb(69 232 224 / 35%);
+  transform: rotate(0deg);
+}
+
 .art-label {
   position: absolute;
   top: 16px;

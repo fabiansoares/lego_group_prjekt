@@ -1,6 +1,6 @@
 # Pixel Palace Arcade
 
-Pixel Palace is a retro-inspired browser arcade with five games. It is built with HTML, CSS, and JavaScript and works on desktop and mobile browsers.
+Pixel Palace is a retro-inspired browser arcade with six games. It is built with HTML, CSS, and JavaScript and works on desktop and mobile browsers.
 
 ## Home page
 
@@ -15,6 +15,7 @@ Pixel Palace is a retro-inspired browser arcade with five games. It is built wit
 | [Reaction Rush](Reaktion%20game/index.html) | Wait for the screen to turn green, then tap as quickly as you can. |
 | [Snake](snake/index.html) | Eat the food, grow longer, and avoid the walls and your tail. |
 | [Brick Breaker](brick-breaker/index.html) | Bounce the ball with the paddle and clear the bricks. |
+| [Asteroid Hop](platformer/index.html) | Leap across asteroids, dodge aliens, and reach each level checkpoint. |
 
 ## Run locally
 
@@ -38,6 +39,7 @@ You can also use a local web server extension in your code editor.
 - **Reaction Rush:** Tap or click the game area when it turns green.
 - **Snake:** Use the arrow keys or swipe on the board to steer.
 - **Brick Breaker:** Use the arrow keys, or drag the paddle; on phones, touch and drag.
+- **Asteroid Hop:** Use the arrow keys or on-screen controls to move and jump; press P to pause.
 
 ## Project structure
 
@@ -49,7 +51,8 @@ Arcade/
 |-- memory game/
 |-- Reaktion game/
 |-- snake/
-`-- brick-breaker/
+|-- brick-breaker/
+`-- platformer/
 ```
 
 Each game folder contains its own page, styles, and game logic. The LEGO Building Run folder also includes the Supabase leaderboard setup SQL.
