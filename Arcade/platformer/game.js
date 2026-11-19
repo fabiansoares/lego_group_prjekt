@@ -1228,7 +1228,7 @@ startButton.setFontSize(compact ? 14 : 17);
 leaderboardTitle.setPosition(portraitLayout ? centerX : width * 0.7375, placeY(0.68, 120));
 leaderboardTitle.setFontSize(compact ? 16 : 18);
 startLeaderboardText.setPosition(portraitLayout ? 24 : width * 0.58125, placeY(0.72, 145));
-startLeaderboardText.setOrigin(portraitLayout ? 0.5 : 0, 0);
+startLeaderboardText.setOrigin(0, 0);
 startLeaderboardText.setFontSize(compact ? 12 : 15).setLineSpacing(compact ? 1 : 4);
 startLeaderboardText.setWordWrapWidth(portraitLayout ? width - 48 : width * 0.38);
 };
@@ -1882,7 +1882,7 @@ fontSize: "15px",
 color: "#ffffff",
 lineSpacing: 4
 });
-leaderboardText.setOrigin(portraitLayout ? 0.5 : 0, 0).setFontSize(compact ? 12 : 15).setLineSpacing(compact ? 1 : 4).setWordWrapWidth(portraitLayout ? width - 48 : width * 0.38);
+leaderboardText.setOrigin(0, 0).setFontSize(compact ? 12 : 15).setLineSpacing(compact ? 1 : 4).setWordWrapWidth(portraitLayout ? width - 48 : width * 0.38);
 gameOverScreen.add(leaderboardText);
 refreshLeaderboard(leaderboardText, score);
 const restart = () => {
