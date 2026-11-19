@@ -1,5 +1,13 @@
 // Game settings
-const useResponsiveViewport = window.innerWidth < 620 || window.innerHeight < 480 || window.innerHeight > window.innerWidth;
+function shouldUseResponsiveViewport() {
+return window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 620 || window.innerHeight < 480 || window.innerHeight > window.innerWidth;
+}
+const useResponsiveViewport = shouldUseResponsiveViewport();
+window.addEventListener("resize", () => {
+if (shouldUseResponsiveViewport() !== useResponsiveViewport) {
+window.location.reload();
+}
+});
 const config = {
 type: Phaser.AUTO,
 width: 800,
