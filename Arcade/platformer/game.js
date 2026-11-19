@@ -1,14 +1,16 @@
 // Game settings
+const useResponsiveViewport = window.innerWidth < 620 || window.innerHeight < 480 || window.innerHeight > window.innerWidth;
 const config = {
 type: Phaser.AUTO,
 width: 800,
 height: 450,
+parent: "game-container",
 backgroundColor: "#080b1e",
 physics: {
 default: "arcade",
 arcade: { gravity: { y: 910 }, debug: false }
 },
-scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
+scale: { mode: useResponsiveViewport ? Phaser.Scale.RESIZE : Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
 input: { activePointers: 3 },
 scene: { create, update }
 };
@@ -17,6 +19,8 @@ const WORLD_WIDTH = 10000000;
 const START_X = 100;
 const START_Y = 274;
 const START_PLATFORM_Y = 330;
+let startPlayerY = START_Y;
+let startPlatformY = START_PLATFORM_Y;
 const PLATFORM_WIDTH = 64;
 const PLATFORM_HEIGHT = 48;
 const PLATFORM_GENERATION_DISTANCE = 900;
@@ -54,6 +58,9 @@ let pauseButton, musicButton, muteButton, pauseOverlay, isGamePaused = false;
 let gameStarted = false;
 let nextPlatformX, lastPlatformY;
 let musicContext, musicMaster, soundEffectsMaster, musicTimer, musicStep = 0, musicEnabled = true;
+function isCompactLayout(width, height) {
+return width < 620 || height > width || (useResponsiveViewport && height < 480);
+}
 function updateTouchButton(control) {
 const button = touchButtons[control];
 if (!button) {
@@ -104,6 +111,14 @@ return;
 }
 const shop = scene.add.container(0, 0).setScrollFactor(0).setDepth(30);
 characterShopContainer = shop;
+const viewportWidth = scene.scale.width;
+const viewportHeight = scene.scale.height;
+const compact = viewportWidth < 620;
+const centerX = viewportWidth / 2;
+const centerY = viewportHeight / 2;
+const panelWidth = Math.min(720, viewportWidth - 24);
+const panelHeight = Math.min(compact ? 620 : 380, viewportHeight - 24);
+const panelTop = centerY - panelHeight / 2;
 const coinCounterWasVisible = coinHudText.visible;
 coinHudText.setVisible(false);
 const livesCounterWasVisible = livesText.visible;
@@ -116,15 +131,15 @@ const muteButtonWasVisible = muteButton.visible;
 pauseButton.setVisible(false);
 musicButton.setVisible(false);
 muteButton.setVisible(false);
-shop.add(scene.add.rectangle(400, 225, 800, 450, 0x030916, 0.82));
-shop.add(scene.add.rectangle(400, 225, 720, 380, 0x071226, 1).setStrokeStyle(2, 0x71d2f4, 0.95));
-shop.add(scene.add.text(400, 67, "SPACE CHARACTER SHOP", {
+shop.add(scene.add.rectangle(centerX, centerY, viewportWidth, viewportHeight, 0x030916, 0.82));
+shop.add(scene.add.rectangle(centerX, centerY, panelWidth, panelHeight, 0x071226, 1).setStrokeStyle(2, 0x71d2f4, 0.95));
+shop.add(scene.add.text(centerX, panelTop + (compact ? 56 : 34), "SPACE CHARACTER SHOP", {
 fontFamily: "Arial",
-fontSize: "28px",
+fontSize: compact ? "22px" : "28px",
 fontStyle: "bold",
 color: "#9ee5ff"
 }).setOrigin(0.5));
-const walletText = scene.add.text(400, 103, `Your coins: ${coinBalance}`, {
+const walletText = scene.add.text(centerX, panelTop + (compact ? 84 : 66), `Your coins: ${coinBalance}`, {
 fontFamily: "Arial",
 fontSize: "18px",
 fontStyle: "bold",
@@ -133,23 +148,27 @@ color: "#ffe58a"
 shop.add(walletText);
 const rows = SPACE_CHARACTERS.map((character, index) => {
 const column = index % 2;
-const centerX = column === 0 ? 235 : 565;
-const y = 145 + Math.floor(index / 2) * 51;
-const background = scene.add.rectangle(centerX, y, 320, 44, 0x10233a, 1).setStrokeStyle(1, 0x34506b, 1);
+const rowCenterX = compact ? centerX : centerX + (column === 0 ? -panelWidth * 0.23 : panelWidth * 0.23);
+const y = compact ? panelTop + 122 + index * 42 : panelTop + 122 + Math.floor(index / 2) * 51;
+const rowWidth = compact ? Math.min(320, panelWidth - 24) : 320;
+const background = scene.add.rectangle(rowCenterX, y, rowWidth, 40, 0x10233a, 1).setStrokeStyle(1, 0x34506b, 1);
 shop.add(background);
-shop.add(scene.add.image(centerX - 127, y, getCharacterTexture(character.id, "idle")).setScale(0.6));
-shop.add(scene.add.text(centerX - 95, y - 7, character.name, {
+const imageX = compact ? rowCenterX - rowWidth / 2 + 20 : rowCenterX - 127;
+const labelX = compact ? rowCenterX - rowWidth / 2 + 42 : rowCenterX - 95;
+const actionX = compact ? rowCenterX + rowWidth / 2 - 48 : rowCenterX + 105;
+shop.add(scene.add.image(imageX, y, getCharacterTexture(character.id, "idle")).setScale(0.6));
+shop.add(scene.add.text(labelX, y - 7, character.name, {
 fontFamily: "Arial",
-fontSize: "15px",
+fontSize: compact ? "14px" : "15px",
 fontStyle: "bold",
 color: "#ffffff"
 }).setOrigin(0, 0.5));
-shop.add(scene.add.text(centerX - 95, y + 11, character.cost === 0 ? "FREE" : `${character.cost} coins`, {
+shop.add(scene.add.text(labelX, y + 10, character.cost === 0 ? "FREE" : `${character.cost} coins`, {
 fontFamily: "Arial",
 fontSize: "13px",
 color: "#c5d6e8"
 }).setOrigin(0, 0.5));
-const action = scene.add.text(centerX + 105, y, "", {
+const action = scene.add.text(actionX, y, "", {
 fontFamily: "Arial",
 fontSize: "12px",
 fontStyle: "bold",
@@ -160,13 +179,13 @@ padding: { x: 7, y: 6 }
 shop.add(action);
 return { character, background, action };
 });
-const statusText = scene.add.text(400, 354, "Collect coins by landing on asteroids to unlock new pilots.", {
+const statusText = scene.add.text(centerX, panelTop + panelHeight - 54, "Collect coins by landing on asteroids to unlock new pilots.", {
 fontFamily: "Arial",
-fontSize: "14px",
+fontSize: compact ? "12px" : "14px",
 color: "#c5d6e8"
 }).setOrigin(0.5);
 shop.add(statusText);
-const closeButton = scene.add.text(400, 383, "CLOSE", {
+const closeButton = scene.add.text(centerX, panelTop + panelHeight - 24, "CLOSE", {
 fontFamily: "Arial",
 fontSize: "15px",
 fontStyle: "bold",
@@ -430,16 +449,21 @@ if (isGamePaused) {
 scene.physics.world.pause();
 clearTouchControls();
 touchControlLayer.setVisible(false);
+const viewportWidth = scene.scale.width;
+const viewportHeight = scene.scale.height;
+const centerX = viewportWidth / 2;
+const centerY = viewportHeight / 2;
+const compact = isCompactLayout(viewportWidth, viewportHeight);
 pauseOverlay = scene.add.container(0, 0).setScrollFactor(0).setDepth(20);
-pauseOverlay.add(scene.add.rectangle(400, 225, 800, 450, 0x030916, 0.72));
-pauseOverlay.add(scene.add.rectangle(400, 225, 380, 150, 0x071226, 1).setStrokeStyle(2, 0x71d2f4, 0.95));
-pauseOverlay.add(scene.add.text(400, 205, "PAUSED", {
+pauseOverlay.add(scene.add.rectangle(centerX, centerY, viewportWidth, viewportHeight, 0x030916, 0.72));
+pauseOverlay.add(scene.add.rectangle(centerX, centerY, Math.min(380, viewportWidth - 32), 150, 0x071226, 1).setStrokeStyle(2, 0x71d2f4, 0.95));
+pauseOverlay.add(scene.add.text(centerX, centerY - 20, "PAUSED", {
 fontFamily: "Arial",
 fontSize: "34px",
 fontStyle: "bold",
 color: "#9ee5ff"
 }).setOrigin(0.5));
-pauseOverlay.add(scene.add.text(400, 253, "Click RESUME or press P", {
+pauseOverlay.add(scene.add.text(centerX, centerY + 28, compact ? "Tap RESUME or press P" : "Click RESUME or press P", {
 fontFamily: "Arial",
 fontSize: "17px",
 color: "#c5d6e8"
@@ -844,13 +868,17 @@ g.fillStyle(0xfff0a3);
 g.fillCircle(12, 10, 2);
 g.generateTexture("level_flag", 28, 34);
 g.destroy();
-spaceBackground = this.add.tileSprite(0, 0, 800, 450, "space")
+const viewportWidth = this.scale.width;
+const viewportHeight = this.scale.height;
+startPlatformY = viewportHeight * (START_PLATFORM_Y / 450);
+startPlayerY = startPlatformY - (START_PLATFORM_Y - START_Y);
+spaceBackground = this.add.tileSprite(0, 0, viewportWidth, viewportHeight, "space")
 .setOrigin(0)
 .setScrollFactor(0)
 .setDepth(-1);
 // Keep the world wide so platforms can continue generating ahead.
-this.physics.world.setBounds(0, 0, WORLD_WIDTH, 450);
-this.cameras.main.setBounds(0, 0, WORLD_WIDTH, 450);
+this.physics.world.setBounds(0, 0, WORLD_WIDTH, viewportHeight);
+this.cameras.main.setBounds(0, 0, WORLD_WIDTH, viewportHeight);
 platforms = this.physics.add.staticGroup();
 coins = this.physics.add.group();
 aliens = this.physics.add.group();
@@ -862,11 +890,11 @@ selectedCharacter = unlockedCharacters.includes(storedCharacter) ? storedCharact
 level = 1;
 platformsSinceLevel = 0;
 nextPlatformX = START_X;
-lastPlatformY = START_PLATFORM_Y;
-platforms.create(START_X, START_PLATFORM_Y, "asteroid");
+lastPlatformY = startPlatformY;
+platforms.create(START_X, startPlatformY, "asteroid");
 generatePlatformsUntil(START_X + PLATFORM_GENERATION_DISTANCE, this);
 // The player
-player = this.physics.add.sprite(START_X, START_Y, getCharacterTexture(selectedCharacter, "idle"));
+player = this.physics.add.sprite(START_X, startPlayerY, getCharacterTexture(selectedCharacter, "idle"));
 player.setCollideWorldBounds(true);
 this.physics.add.collider(player, platforms, countAsteroidLanding);
 this.physics.add.collider(aliens, platforms);
@@ -892,7 +920,7 @@ strokeThickness: 4
 }).setScrollFactor(0).setDepth(10);
 scoreText.setVisible(false);
 highScoreText.setVisible(false);
-coinHudText = this.add.text(784, 58, `Coins: ${coinBalance}`, {
+coinHudText = this.add.text(viewportWidth - 16, 58, `Coins: ${coinBalance}`, {
 fontFamily: "Arial",
 fontSize: "18px",
 fontStyle: "bold",
@@ -901,7 +929,7 @@ stroke: "#080b1e",
 strokeThickness: 4
 }).setOrigin(1, 0).setScrollFactor(0).setDepth(25);
 lives = MAX_LIVES;
-livesText = this.add.text(784, 84, `Lives: ${lives}`, {
+livesText = this.add.text(viewportWidth - 16, 84, `Lives: ${lives}`, {
 fontFamily: "Arial",
 fontSize: "18px",
 fontStyle: "bold",
@@ -917,7 +945,10 @@ color: "#9ee5ff",
 stroke: "#080b1e",
 strokeThickness: 4
 }).setScrollFactor(0).setDepth(25);
-pauseButton = this.add.text(645, 420, "PAUSE", {
+coinHudText.setVisible(false);
+livesText.setVisible(false);
+levelText.setVisible(false);
+pauseButton = this.add.text(viewportWidth - 155, viewportHeight - 30, "PAUSE", {
 fontFamily: "Arial",
 fontSize: "14px",
 fontStyle: "bold",
@@ -925,7 +956,7 @@ color: "#9ee5ff",
 backgroundColor: "#142b45",
 padding: { x: 10, y: 6 }
 }).setOrigin(0.5).setScrollFactor(0).setDepth(25).setInteractive({ useHandCursor: true }).setVisible(false);
-musicButton = this.add.text(746, 420, `MUSIC: ${musicEnabled ? "ON" : "OFF"}`, {
+musicButton = this.add.text(viewportWidth - 54, viewportHeight - 30, `MUSIC: ${musicEnabled ? "ON" : "OFF"}`, {
 fontFamily: "Arial",
 fontSize: "14px",
 fontStyle: "bold",
@@ -933,7 +964,7 @@ color: "#ffe58a",
 backgroundColor: "#142b45",
 padding: { x: 8, y: 6 }
 }).setOrigin(0.5).setScrollFactor(0).setDepth(25).setInteractive({ useHandCursor: true });
-muteButton = this.add.text(555, 420, audioMuted ? "UNMUTE" : "MUTE", {
+muteButton = this.add.text(viewportWidth - 245, viewportHeight - 30, audioMuted ? "UNMUTE" : "MUTE", {
 fontFamily: "Arial",
 fontSize: "14px",
 fontStyle: "bold",
@@ -946,14 +977,14 @@ touchPointerIds = { left: new Set(), right: new Set(), jump: new Set() };
 touchButtons = {};
 touchControlLayer = this.add.container(0, 0).setScrollFactor(0).setDepth(25).setVisible(false);
 const touchButtonSpecs = [
-{ control: "left", x: 54, radius: 36, label: "◀" },
-{ control: "right", x: 136, radius: 36, label: "▶" },
-{ control: "jump", x: 238, radius: 42, label: "JUMP" }
+{ control: "left", x: 54, y: viewportHeight - 54, radius: 36, label: "◀" },
+{ control: "right", x: 136, y: viewportHeight - 54, radius: 36, label: "▶" },
+{ control: "jump", x: viewportWidth - 54, y: viewportHeight - 54, radius: 42, label: "JUMP" }
 ];
 for (const spec of touchButtonSpecs) {
-const background = this.add.circle(spec.x, 408, spec.radius, 0x142b45, 0.72)
+const background = this.add.circle(spec.x, spec.y, spec.radius, 0x142b45, 0.72)
 .setStrokeStyle(2, 0x71d2f4, 0.9);
-const label = this.add.text(spec.x, 408, spec.label, {
+const label = this.add.text(spec.x, spec.y, spec.label, {
 fontFamily: "Arial",
 fontSize: spec.control === "jump" ? "14px" : "25px",
 fontStyle: "bold",
@@ -961,35 +992,79 @@ color: "#ffffff"
 }).setOrigin(0.5);
 touchControlLayer.add([background, label]);
 touchButtons[spec.control] = {
-zone: new Phaser.Geom.Circle(spec.x, 408, spec.radius),
+zone: new Phaser.Geom.Circle(spec.x, spec.y, spec.radius),
 background,
 label
 };
 }
+const layoutGameUi = (width, height) => {
+const compact = isCompactLayout(width, height);
+if (compact) {
+scoreText.setPosition(12, 44).setFontSize(18);
+highScoreText.setPosition(12, 68).setFontSize(15);
+levelText.setPosition(12, 92).setFontSize(15);
+coinHudText.setPosition(width - 12, 12).setFontSize(15);
+livesText.setPosition(width - 12, 35).setFontSize(15);
+pauseButton.setPosition(width - 48, 82);
+musicButton.setPosition(width - 58, 119).setFontSize(12);
+muteButton.setPosition(width - 48, 155).setFontSize(12);
+} else {
+scoreText.setPosition(16, 16).setFontSize(22);
+highScoreText.setPosition(16, 44).setFontSize(18);
+levelText.setPosition(40, 72).setFontSize(18);
+coinHudText.setPosition(width - 16, 58).setFontSize(18);
+livesText.setPosition(width - 16, 84).setFontSize(18);
+pauseButton.setPosition(width - 155, height - 30).setFontSize(14);
+musicButton.setPosition(width - 54, height - 30).setFontSize(14);
+muteButton.setPosition(width - 245, height - 30).setFontSize(14);
+}
+const controlY = height - 54;
+const controlPositions = compact
+? { left: 54, right: 136, jump: width - 54 }
+: { left: 54, right: 136, jump: 238 };
+for (const spec of touchButtonSpecs) {
+spec.x = controlPositions[spec.control];
+spec.y = controlY;
+const button = touchButtons[spec.control];
+button.background.setPosition(spec.x, spec.y);
+button.label.setPosition(spec.x, spec.y);
+button.zone.setTo(spec.x, spec.y, spec.radius);
+}
+spaceBackground.setSize(width, height);
+this.physics.world.setBounds(0, 0, WORLD_WIDTH, height);
+this.cameras.main.setBounds(0, 0, WORLD_WIDTH, height);
+};
+layoutGameUi(viewportWidth, viewportHeight);
 // The camera follows the player
 this.cameras.main.startFollow(player);
 // Arrow keys and space
 cursors = this.input.keyboard.createCursorKeys();
 this.physics.world.pause();
 const startScreen = this.add.container(0, 0).setScrollFactor(0).setDepth(20);
-startScreen.add(this.add.image(400, 225, "space").setDisplaySize(800, 450));
-startScreen.add(this.add.rectangle(400, 225, 800, 450, 0x030916, 0.3));
-startScreen.add(this.add.rectangle(400, 225, 760, 370, 0x071226, 0.9).setStrokeStyle(2, 0x71d2f4, 0.8));
-startScreen.add(this.add.rectangle(420, 230, 2, 270, 0x71d2f4, 0.6));
-startScreen.add(this.add.text(400, 78, "ASTEROID HOP", {
+const startBackground = this.add.image(0, 0, "space");
+startScreen.add(startBackground);
+const startBackdrop = this.add.rectangle(0, 0, 800, 450, 0x030916, 0.3);
+startScreen.add(startBackdrop);
+const startPanel = this.add.rectangle(0, 0, 760, 370, 0x071226, 0.9).setStrokeStyle(2, 0x71d2f4, 0.8);
+startScreen.add(startPanel);
+const startDivider = this.add.rectangle(420, 230, 2, 270, 0x71d2f4, 0.6);
+startScreen.add(startDivider);
+const gameTitle = this.add.text(400, 78, "ASTEROID HOP", {
 fontFamily: "Arial",
 fontSize: "38px",
 fontStyle: "bold",
 color: "#9ee5ff",
 stroke: "#080b1e",
 strokeThickness: 5
-}).setOrigin(0.5));
-startScreen.add(this.add.text(220, 143, "Type your pilot name:", {
+}).setOrigin(0.5);
+startScreen.add(gameTitle);
+const nameLabel = this.add.text(220, 143, "Type your pilot name:", {
 fontFamily: "Arial",
 fontSize: "17px",
 color: "#ffffff",
 align: "center"
-}).setOrigin(0.5));
+}).setOrigin(0.5);
+startScreen.add(nameLabel);
 const nameField = this.add.rectangle(220, 180, 260, 36, 0x0b1c31, 1)
 .setStrokeStyle(1, 0x71d2f4, 1)
 .setInteractive({ useHandCursor: true });
@@ -1006,71 +1081,20 @@ fontSize: "12px",
 color: "#ff9b8e"
 }).setOrigin(0.5).setVisible(false);
 startScreen.add(playerNameError);
-let hasEditedName = false;
-const pilotNameInput = document.getElementById("pilot-name-input");
-const positionPilotNameInput = () => {
-const canvas = document.querySelector("canvas");
-if (!canvas) {
-return;
-}
-const bounds = canvas.getBoundingClientRect();
-const scaleX = bounds.width / 800;
-const scaleY = bounds.height / 450;
-pilotNameInput.style.left = `${bounds.left + 90 * scaleX}px`;
-pilotNameInput.style.top = `${bounds.top + 162 * scaleY}px`;
-pilotNameInput.style.width = `${260 * scaleX}px`;
-pilotNameInput.style.height = `${36 * scaleY}px`;
-pilotNameInput.style.fontSize = `${Math.max(12, 16 * scaleY)}px`;
-};
-const commitPilotNameInput = () => {
-if (!pilotNameInput.classList.contains("is-visible")) {
-return;
-}
-const cleanName = sanitizePlayerName(pilotNameInput.value);
-hasEditedName = true;
-playerNameText.setText(cleanName);
-playerNameError.setVisible(!cleanName);
-pilotNameInput.classList.remove("is-visible");
-pilotNameInput.blur();
-};
-const showPilotNameInput = () => {
-positionPilotNameInput();
-pilotNameInput.value = playerNameText.text;
-pilotNameInput.classList.add("is-visible");
-pilotNameInput.setSelectionRange(0, pilotNameInput.value.length);
-window.setTimeout(() => pilotNameInput.focus(), 50);
-};
-pilotNameInput.addEventListener("input", () => {
-const cleanName = sanitizePlayerName(pilotNameInput.value);
-pilotNameInput.value = cleanName;
-hasEditedName = true;
-playerNameText.setText(cleanName);
-playerNameError.setVisible(!cleanName);
-});
-pilotNameInput.addEventListener("blur", commitPilotNameInput);
-pilotNameInput.addEventListener("keydown", (event) => {
-if (event.code === "Enter") {
-event.preventDefault();
-event.stopPropagation();
-commitPilotNameInput();
-}
-});
-window.addEventListener("resize", positionPilotNameInput);
-nameField.on("pointerdown", () => {
-showPilotNameInput();
-});
-startScreen.add(this.add.text(220, 234, `Best run: ${highScore}`, {
+const bestRunText = this.add.text(220, 234, `Best run: ${highScore}`, {
 fontFamily: "Arial",
 fontSize: "20px",
 fontStyle: "bold",
 color: "#ffe58a"
-}).setOrigin(0.5));
-startScreen.add(this.add.text(220, 266, "Move: LEFT / RIGHT\nJump: UP / SPACE\n3 LIVES PER RUN • M: Toggle music", {
+}).setOrigin(0.5);
+startScreen.add(bestRunText);
+const instructionsText = this.add.text(220, 266, "Move: LEFT / RIGHT\nJump: UP / SPACE\n3 LIVES PER RUN • M: Toggle music", {
 fontFamily: "Arial",
 fontSize: "16px",
 color: "#c5d6e8",
 align: "center"
-}).setOrigin(0.5));
+}).setOrigin(0.5);
+startScreen.add(instructionsText);
 const shopButton = this.add.text(220, 315, `CHARACTER SHOP • ${coinBalance} COINS`, {
 fontFamily: "Arial",
 fontSize: "15px",
@@ -1089,12 +1113,13 @@ backgroundColor: "#142b45",
 padding: { x: 14, y: 8 }
 }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 startScreen.add(startButton);
-startScreen.add(this.add.text(590, 120, "WORLD LEADERBOARD", {
+const leaderboardTitle = this.add.text(590, 120, "WORLD LEADERBOARD", {
 fontFamily: "Arial",
 fontSize: "18px",
 fontStyle: "bold",
 color: "#9ee5ff"
-}).setOrigin(0.5));
+}).setOrigin(0.5);
+startScreen.add(leaderboardTitle);
 const startLeaderboardText = this.add.text(465, 145, "Loading leaderboard...", {
 fontFamily: "monospace",
 fontSize: "15px",
@@ -1102,6 +1127,112 @@ color: "#ffffff",
 lineSpacing: 4
 });
 startScreen.add(startLeaderboardText);
+let hasEditedName = false;
+const pilotNameInput = document.getElementById("pilot-name-input");
+const positionPilotNameInput = () => {
+if (!startScreen.active) {
+return;
+}
+const canvas = document.querySelector("canvas");
+if (!canvas) {
+return;
+}
+const bounds = canvas.getBoundingClientRect();
+const scaleX = bounds.width / this.scale.width;
+const scaleY = bounds.height / this.scale.height;
+const fieldBounds = nameField.getBounds();
+pilotNameInput.style.left = `${bounds.left + fieldBounds.x * scaleX}px`;
+pilotNameInput.style.top = `${bounds.top + fieldBounds.y * scaleY}px`;
+pilotNameInput.style.width = `${fieldBounds.width * scaleX}px`;
+pilotNameInput.style.height = `${fieldBounds.height * scaleY}px`;
+pilotNameInput.style.fontSize = `${Math.max(12, 16 * scaleY)}px`;
+};
+const commitPilotNameInput = () => {
+if (!pilotNameInput.classList.contains("is-visible")) {
+return;
+}
+const cleanName = sanitizePlayerName(pilotNameInput.value);
+hasEditedName = true;
+playerNameText.setText(cleanName);
+playerNameError.setVisible(!cleanName);
+pilotNameInput.classList.remove("is-visible");
+pilotNameInput.blur();
+};
+const showPilotNameInput = () => {
+positionPilotNameInput();
+pilotNameInput.value = playerNameText.text;
+pilotNameInput.classList.add("is-visible");
+pilotNameInput.setSelectionRange(0, pilotNameInput.value.length);
+pilotNameInput.focus();
+};
+pilotNameInput.addEventListener("input", () => {
+const cleanName = sanitizePlayerName(pilotNameInput.value);
+pilotNameInput.value = cleanName;
+hasEditedName = true;
+playerNameText.setText(cleanName);
+playerNameError.setVisible(!cleanName);
+});
+pilotNameInput.addEventListener("blur", commitPilotNameInput);
+pilotNameInput.addEventListener("keydown", (event) => {
+if (event.key === "Enter" || event.code === "Enter" || event.keyCode === 13) {
+event.preventDefault();
+event.stopPropagation();
+commitPilotNameInput();
+}
+});
+window.addEventListener("resize", positionPilotNameInput);
+nameField.on("pointerdown", () => {
+showPilotNameInput();
+});
+const layoutStartScreen = (width, height) => {
+if (!startScreen.active) {
+return;
+}
+const compact = isCompactLayout(width, height);
+const portraitLayout = width < 620 || height > width;
+const centerX = width / 2;
+const centerY = height / 2;
+musicButton.setVisible(!portraitLayout);
+muteButton.setVisible(!portraitLayout);
+const backgroundScale = Math.max(width / 800, height / 450);
+startBackground.setPosition(centerX, centerY).setDisplaySize(800 * backgroundScale, 450 * backgroundScale);
+startBackdrop.setPosition(centerX, centerY).setSize(width, height);
+startPanel.setPosition(centerX, centerY);
+startPanel.setSize(compact ? width - 24 : width * 0.95, compact ? height - 24 : height * 0.82);
+startDivider.setPosition(width * 0.525, centerY).setSize(2, height * 0.6).setVisible(!portraitLayout);
+const leftX = portraitLayout ? centerX : width * 0.275;
+const scaleY = height / 450;
+const placeY = (compactY, desktopY) => portraitLayout ? height * compactY : desktopY * scaleY;
+gameTitle.setPosition(centerX, placeY(0.11, 78));
+gameTitle.setFontSize(compact ? 30 : 38);
+nameLabel.setPosition(leftX, placeY(0.20, 143));
+nameField.setPosition(leftX, placeY(0.245, 180)).setSize(Math.min(260, width - 40), 36);
+playerNameText.setPosition(leftX, placeY(0.245, 180));
+playerNameError.setPosition(leftX, placeY(0.28, 208)).setFontSize(compact ? 11 : 12).setWordWrapWidth(width - 32);
+bestRunText.setPosition(leftX, placeY(0.33, 234));
+bestRunText.setFontSize(compact ? 17 : 20);
+instructionsText.setPosition(leftX, placeY(0.40, 266));
+instructionsText.setFontSize(compact ? 14 : 16);
+shopButton.setPosition(leftX, placeY(0.52, 315));
+shopButton.setFontSize(compact ? 13 : 15);
+startButton.setPosition(leftX, placeY(0.60, 367));
+startButton.setFontSize(compact ? 14 : 17);
+leaderboardTitle.setPosition(portraitLayout ? centerX : width * 0.7375, placeY(0.68, 120));
+leaderboardTitle.setFontSize(compact ? 16 : 18);
+startLeaderboardText.setPosition(portraitLayout ? 24 : width * 0.58125, placeY(0.72, 145));
+startLeaderboardText.setOrigin(portraitLayout ? 0.5 : 0, 0);
+startLeaderboardText.setFontSize(compact ? 12 : 15).setLineSpacing(compact ? 1 : 4);
+startLeaderboardText.setWordWrapWidth(portraitLayout ? width - 48 : width * 0.38);
+};
+layoutStartScreen(viewportWidth, viewportHeight);
+this.scale.on(Phaser.Scale.Events.RESIZE, (gameSize) => {
+layoutGameUi(gameSize.width, gameSize.height);
+layoutStartScreen(gameSize.width, gameSize.height);
+positionPilotNameInput();
+});
+this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+window.removeEventListener("resize", positionPilotNameInput);
+});
 refreshLeaderboard(startLeaderboardText);
 const startGame = () => {
 if (gameStarted || characterShopContainer) {
@@ -1121,6 +1252,9 @@ this.physics.world.resume();
 startBackgroundMusic();
 scoreText.setVisible(true);
 highScoreText.setVisible(true);
+coinHudText.setVisible(true);
+livesText.setVisible(true);
+levelText.setVisible(true);
 pauseButton.setVisible(true);
 musicButton.setVisible(true);
 muteButton.setVisible(true);
@@ -1228,8 +1362,8 @@ const previousPlatformY = lastPlatformY;
 const gap = Phaser.Math.Between(340, 430);
 nextPlatformX += PLATFORM_WIDTH + gap;
 const verticalVariation = Math.min(45 + (level - 1) * 2, 60);
-const minY = Math.max(250, lastPlatformY - verticalVariation);
-const maxY = Math.min(360, lastPlatformY + verticalVariation);
+const minY = Math.max(scene.scale.height * (250 / 450), lastPlatformY - verticalVariation);
+const maxY = Math.min(scene.scale.height * 0.8, lastPlatformY + verticalVariation);
 lastPlatformY = Phaser.Math.Between(minY, maxY);
 const platform = platforms.create(nextPlatformX, lastPlatformY, "asteroid");
 configureMovingPlatform(platform, gap);
@@ -1394,16 +1528,20 @@ scene.physics.world.pause();
 pauseButton.setVisible(false);
 clearTouchControls();
 touchControlLayer.setVisible(false);
+const viewportWidth = scene.scale.width;
+const viewportHeight = scene.scale.height;
+const centerX = viewportWidth / 2;
+const centerY = viewportHeight / 2;
 pauseOverlay = scene.add.container(0, 0).setScrollFactor(0).setDepth(20);
-pauseOverlay.add(scene.add.rectangle(400, 225, 800, 450, 0x030916, 0.72));
-pauseOverlay.add(scene.add.rectangle(400, 225, 440, 150, 0x071226, 1).setStrokeStyle(2, 0xff9b8e, 0.95));
-pauseOverlay.add(scene.add.text(400, 205, "LIFE LOST", {
+pauseOverlay.add(scene.add.rectangle(centerX, centerY, viewportWidth, viewportHeight, 0x030916, 0.72));
+pauseOverlay.add(scene.add.rectangle(centerX, centerY, Math.min(440, viewportWidth - 32), 150, 0x071226, 1).setStrokeStyle(2, 0xff9b8e, 0.95));
+pauseOverlay.add(scene.add.text(centerX, centerY - 20, "LIFE LOST", {
 fontFamily: "Arial",
 fontSize: "32px",
 fontStyle: "bold",
 color: "#ff9b8e"
 }).setOrigin(0.5));
-pauseOverlay.add(scene.add.text(400, 251, `${lives} LIVES LEFT - RESPAWNING`, {
+pauseOverlay.add(scene.add.text(centerX, centerY + 26, `${lives} LIVES LEFT - RESPAWNING`, {
 fontFamily: "Arial",
 fontSize: "16px",
 color: "#ffffff"
@@ -1412,7 +1550,7 @@ scene.time.delayedCall(100, () => {
 if (!gameStarted || !isRespawning) {
 return;
 }
-player.setPosition(START_X, START_Y);
+player.setPosition(START_X, startPlayerY);
 player.standingPlatform = null;
 player.setVelocity(0, 0);
 player.setTexture(getCharacterTexture(selectedCharacter, "idle"));
@@ -1427,7 +1565,7 @@ destroyPlatform(platform);
 }
 });
 nextPlatformX = START_X;
-lastPlatformY = START_PLATFORM_Y;
+lastPlatformY = startPlatformY;
 generatePlatformsUntil(START_X + PLATFORM_GENERATION_DISTANCE, scene);
 scene.cameras.main.stopFollow();
 scene.cameras.main.setScroll(0, 0);
@@ -1499,20 +1637,22 @@ clearTouchControls();
 touchControlLayer.setVisible(false);
 const overlay = scene.add.container(0, 0).setScrollFactor(0).setDepth(35);
 levelCompleteOverlay = overlay;
-overlay.add(scene.add.rectangle(400, 225, 470, 190, 0x071226, 0.97).setStrokeStyle(3, 0x71d2f4, 1));
-overlay.add(scene.add.text(400, 175, "Level complete!", {
+const centerX = scene.scale.width / 2;
+const centerY = scene.scale.height / 2;
+overlay.add(scene.add.rectangle(centerX, centerY, Math.min(470, scene.scale.width - 24), 190, 0x071226, 0.97).setStrokeStyle(3, 0x71d2f4, 1));
+overlay.add(scene.add.text(centerX, centerY - 50, "Level complete!", {
 fontFamily: "Arial",
 fontSize: "30px",
 fontStyle: "bold",
 color: "#9ee5ff"
 }).setOrigin(0.5));
-overlay.add(scene.add.text(400, 220, `Score: ${finalScore}`, {
+overlay.add(scene.add.text(centerX, centerY - 5, `Score: ${finalScore}`, {
 fontFamily: "Arial",
 fontSize: "25px",
 fontStyle: "bold",
 color: "#ffe58a"
 }).setOrigin(0.5));
-overlay.add(scene.add.text(400, 264, `Level ${level} starting...`, {
+overlay.add(scene.add.text(centerX, centerY + 40, `Level ${level} starting...`, {
 fontFamily: "Arial",
 fontSize: "16px",
 color: "#c5d6e8"
@@ -1595,7 +1735,7 @@ targetText.setText("Leaderboard unavailable.\nCheck connection and Supabase setu
 }
 }
 function restartRun(scene) {
-player.setPosition(START_X, START_Y);
+player.setPosition(START_X, startPlayerY);
 player.standingPlatform = null;
 player.setVelocity(0, 0);
 player.setTexture(getCharacterTexture(selectedCharacter, "idle"));
@@ -1627,10 +1767,13 @@ destroyPlatform(platform);
 }
 });
 nextPlatformX = START_X;
-lastPlatformY = START_PLATFORM_Y;
+lastPlatformY = startPlatformY;
 generatePlatformsUntil(START_X + PLATFORM_GENERATION_DISTANCE, scene);
 scoreText.setVisible(true);
 highScoreText.setVisible(true);
+coinHudText.setVisible(true);
+livesText.setVisible(true);
+levelText.setVisible(true);
 gameStarted = true;
 scene.physics.world.resume();
 }
@@ -1641,17 +1784,36 @@ isGamePaused = false;
 scene.physics.world.pause();
 scoreText.setVisible(false);
 highScoreText.setVisible(false);
+coinHudText.setVisible(false);
+livesText.setVisible(false);
+levelText.setVisible(false);
 pauseButton.setVisible(false);
 musicButton.setVisible(true);
 muteButton.setVisible(true);
 clearTouchControls();
 touchControlLayer.setVisible(false);
 const gameOverScreen = scene.add.container(0, 0).setScrollFactor(0).setDepth(20);
-gameOverScreen.add(scene.add.image(400, 225, "space").setDisplaySize(800, 450));
-gameOverScreen.add(scene.add.rectangle(400, 225, 800, 450, 0x030916, 0.3));
-gameOverScreen.add(scene.add.rectangle(400, 225, 760, 370, 0x071226, 0.9).setStrokeStyle(2, 0xff7468, 0.8));
-gameOverScreen.add(scene.add.rectangle(420, 230, 2, 270, 0xff7468, 0.6));
-gameOverScreen.add(scene.add.text(220, 110, "GAME OVER", {
+const width = scene.scale.width;
+const height = scene.scale.height;
+const compact = isCompactLayout(width, height);
+const portraitLayout = width < 620 || height > width;
+const centerX = width / 2;
+const centerY = height / 2;
+if (portraitLayout) {
+musicButton.setVisible(false);
+muteButton.setVisible(false);
+}
+const backgroundScale = Math.max(width / 800, height / 450);
+const gameOverBackground = scene.add.image(centerX, centerY, "space").setDisplaySize(800 * backgroundScale, 450 * backgroundScale);
+gameOverScreen.add(gameOverBackground);
+gameOverScreen.add(scene.add.rectangle(centerX, centerY, width, height, 0x030916, 0.3));
+gameOverScreen.add(scene.add.rectangle(centerX, centerY, compact ? width - 24 : width * 0.95, compact ? height - 24 : height * 0.82, 0x071226, 0.9).setStrokeStyle(2, 0xff7468, 0.8));
+const gameOverDivider = scene.add.rectangle(width * 0.525, centerY, 2, height * 0.6, 0xff7468, 0.6).setVisible(!portraitLayout);
+gameOverScreen.add(gameOverDivider);
+const scaleY = height / 450;
+const leftX = portraitLayout ? centerX : width * 0.275;
+const placeY = (compactY, desktopY) => portraitLayout ? height * compactY : desktopY * scaleY;
+gameOverScreen.add(scene.add.text(leftX, placeY(0.14, 110), "GAME OVER", {
 fontFamily: "Arial",
 fontSize: "40px",
 fontStyle: "bold",
@@ -1659,59 +1821,60 @@ color: "#ff9b8e",
 stroke: "#080b1e",
 strokeThickness: 5
 }).setOrigin(0.5));
-gameOverScreen.add(scene.add.text(220, 170, `Asteroids jumped: ${score}`, {
+gameOverScreen.add(scene.add.text(leftX, placeY(0.25, 170), `Asteroids jumped: ${score}`, {
 fontFamily: "Arial",
 fontSize: "22px",
 fontStyle: "bold",
 color: "#ffffff"
 }).setOrigin(0.5));
-gameOverScreen.add(scene.add.text(220, 208, `Highscore: ${highScore}`, {
+gameOverScreen.add(scene.add.text(leftX, placeY(0.30, 208), `Highscore: ${highScore}`, {
 fontFamily: "Arial",
 fontSize: "20px",
 fontStyle: "bold",
 color: "#ffe58a"
 }).setOrigin(0.5));
-gameOverScreen.add(scene.add.text(220, 238, `Level: ${level}  •  Lives: ${lives}`, {
+gameOverScreen.add(scene.add.text(leftX, placeY(0.34, 238), `Level: ${level}  •  Lives: ${lives}`, {
 fontFamily: "Arial",
 fontSize: "18px",
 fontStyle: "bold",
 color: "#ff9b8e"
 }).setOrigin(0.5));
-const shopButton = scene.add.text(220, 264, `CHARACTER SHOP • ${coinBalance} COINS`, {
+const shopButton = scene.add.text(leftX, placeY(0.42, 264), `CHARACTER SHOP • ${coinBalance} COINS`, {
 fontFamily: "Arial",
-fontSize: "15px",
+fontSize: compact ? "13px" : "15px",
 fontStyle: "bold",
 color: "#ffe58a",
 backgroundColor: "#142b45",
 padding: { x: 14, y: 7 }
 }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 gameOverScreen.add(shopButton);
-gameOverScreen.add(scene.add.text(220, 306, "Press M to toggle music", {
+gameOverScreen.add(scene.add.text(leftX, placeY(0.48, 306), "Press M to toggle music", {
 fontFamily: "Arial",
 fontSize: "15px",
 color: "#c5d6e8"
 }).setOrigin(0.5));
-const restartButton = scene.add.text(220, 353, "CLICK OR PRESS ENTER TO TRY AGAIN", {
+const restartButton = scene.add.text(leftX, placeY(0.55, 353), "CLICK OR PRESS ENTER TO TRY AGAIN", {
 fontFamily: "Arial",
-fontSize: "16px",
+fontSize: compact ? "13px" : "16px",
 fontStyle: "bold",
 color: "#71d2f4",
 backgroundColor: "#142b45",
 padding: { x: 14, y: 8 }
 }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 gameOverScreen.add(restartButton);
-gameOverScreen.add(scene.add.text(590, 120, "WORLD LEADERBOARD", {
+gameOverScreen.add(scene.add.text(portraitLayout ? centerX : width * 0.7375, placeY(0.63, 120), "WORLD LEADERBOARD", {
 fontFamily: "Arial",
 fontSize: "18px",
 fontStyle: "bold",
 color: "#9ee5ff"
 }).setOrigin(0.5));
-const leaderboardText = scene.add.text(465, 145, score > 0 ? "Submitting score..." : "Loading leaderboard...", {
+const leaderboardText = scene.add.text(portraitLayout ? 24 : width * 0.58125, placeY(0.68, 145), score > 0 ? "Submitting score..." : "Loading leaderboard...", {
 fontFamily: "monospace",
 fontSize: "15px",
 color: "#ffffff",
 lineSpacing: 4
 });
+leaderboardText.setOrigin(portraitLayout ? 0.5 : 0, 0).setFontSize(compact ? 12 : 15).setLineSpacing(compact ? 1 : 4).setWordWrapWidth(portraitLayout ? width - 48 : width * 0.38);
 gameOverScreen.add(leaderboardText);
 refreshLeaderboard(leaderboardText, score);
 const restart = () => {

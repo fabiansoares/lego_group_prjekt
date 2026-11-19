@@ -2,11 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Asteroid Hop — Pixel Palace</title>
 <style>
-html, body { margin: 0; height: 100%; overflow: hidden; background: #111026; touch-action: none; }
-canvas { display: block; touch-action: none; }
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #111026; touch-action: none; }
+body { height: 100dvh; }
+#game-container { position: fixed; inset: 0; width: 100%; height: 100%; }
+canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 .arcade-link {
   position: fixed;
   z-index: 1000;
@@ -46,6 +48,7 @@ canvas { display: block; touch-action: none; }
 <body>
 <a class="arcade-link" href="../" aria-label="Return to the Pixel Palace arcade">&larr; Arcade</a>
 <input id="pilot-name-input" class="pilot-name-input" type="text" maxlength="20" autocomplete="nickname" enterkeyhint="done" aria-label="Pilot name">
+<div id="game-container"></div>
 <script
 src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
 <script src="game.js"></script>
