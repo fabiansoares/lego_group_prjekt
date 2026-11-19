@@ -58,5 +58,4 @@ row.forEach((value, c) => {
 if (value) drawBlock(piece.x + c, piece.y + r, piece.color);
 });
 });
-}
-draw(); // draw once. Nothing moves yet: that's your job! 
+} 
