@@ -1007,11 +1007,57 @@ color: "#ff9b8e"
 }).setOrigin(0.5).setVisible(false);
 startScreen.add(playerNameError);
 let hasEditedName = false;
-nameField.on("pointerdown", () => {
-if (!hasEditedName) {
-playerNameText.setText("");
-hasEditedName = true;
+const pilotNameInput = document.getElementById("pilot-name-input");
+const positionPilotNameInput = () => {
+const canvas = document.querySelector("canvas");
+if (!canvas) {
+return;
 }
+const bounds = canvas.getBoundingClientRect();
+const scaleX = bounds.width / 800;
+const scaleY = bounds.height / 450;
+pilotNameInput.style.left = `${bounds.left + 90 * scaleX}px`;
+pilotNameInput.style.top = `${bounds.top + 162 * scaleY}px`;
+pilotNameInput.style.width = `${260 * scaleX}px`;
+pilotNameInput.style.height = `${36 * scaleY}px`;
+pilotNameInput.style.fontSize = `${Math.max(12, 16 * scaleY)}px`;
+};
+const commitPilotNameInput = () => {
+if (!pilotNameInput.classList.contains("is-visible")) {
+return;
+}
+const cleanName = sanitizePlayerName(pilotNameInput.value);
+hasEditedName = true;
+playerNameText.setText(cleanName);
+playerNameError.setVisible(!cleanName);
+pilotNameInput.classList.remove("is-visible");
+pilotNameInput.blur();
+};
+const showPilotNameInput = () => {
+positionPilotNameInput();
+pilotNameInput.value = playerNameText.text;
+pilotNameInput.classList.add("is-visible");
+pilotNameInput.setSelectionRange(0, pilotNameInput.value.length);
+window.setTimeout(() => pilotNameInput.focus(), 50);
+};
+pilotNameInput.addEventListener("input", () => {
+const cleanName = sanitizePlayerName(pilotNameInput.value);
+pilotNameInput.value = cleanName;
+hasEditedName = true;
+playerNameText.setText(cleanName);
+playerNameError.setVisible(!cleanName);
+});
+pilotNameInput.addEventListener("blur", commitPilotNameInput);
+pilotNameInput.addEventListener("keydown", (event) => {
+if (event.code === "Enter") {
+event.preventDefault();
+event.stopPropagation();
+commitPilotNameInput();
+}
+});
+window.addEventListener("resize", positionPilotNameInput);
+nameField.on("pointerdown", () => {
+showPilotNameInput();
 });
 startScreen.add(this.add.text(220, 234, `Best run: ${highScore}`, {
 fontFamily: "Arial",

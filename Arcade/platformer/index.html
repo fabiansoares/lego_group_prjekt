@@ -25,10 +25,27 @@ canvas { display: block; touch-action: none; }
   outline: 3px solid #ffe66d;
   outline-offset: 3px;
 }
+.pilot-name-input {
+  position: fixed;
+  z-index: 1100;
+  display: none;
+  box-sizing: border-box;
+  border: 2px solid #71d2f4;
+  border-radius: 4px;
+  outline: none;
+  background: #0b1c31;
+  color: #ffffff;
+  font: 16px "Trebuchet MS", sans-serif;
+  text-align: center;
+}
+.pilot-name-input.is-visible {
+  display: block;
+}
 </style>
 </head>
 <body>
 <a class="arcade-link" href="../" aria-label="Return to the Pixel Palace arcade">&larr; Arcade</a>
+<input id="pilot-name-input" class="pilot-name-input" type="text" maxlength="20" autocomplete="nickname" enterkeyhint="done" aria-label="Pilot name">
 <script
 src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
 <script src="game.js"></script>

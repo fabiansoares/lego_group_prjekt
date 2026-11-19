@@ -39,7 +39,7 @@ You can also use a local web server extension in your code editor.
 - **Reaction Rush:** Tap or click the game area when it turns green.
 - **Snake:** Use the arrow keys or swipe on the board to steer.
 - **Brick Breaker:** Use the arrow keys, or drag the paddle; on phones, touch and drag.
-- **Asteroid Hop:** Use the arrow keys or on-screen controls to move and jump; press P to pause.
+- **Asteroid Hop:** Tap the pilot name field to use the phone keyboard, use the arrow keys or on-screen controls to move and jump, and press P to pause.
 
 ## Project structure
 
