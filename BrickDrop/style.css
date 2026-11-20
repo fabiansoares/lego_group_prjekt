@@ -1,27 +1,142 @@
 body {
-margin: 0;
-min-height: 100vh;
-display: flex;
-justify-content: center;
-align-items: center;
-background: #1b1b2f;
-color: white;
-font-family: system-ui, sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #1b1b2f;
+    color: white;
+    font-family: system-ui, sans-serif;
 }
+
 .game {
-display: flex;
-gap: 24px;
-align-items: flex-start;
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
 }
+
 canvas {
     background: #0f0f1e;
-border: 2px solid #444;
-max-height: 90vh;
+    border: 2px solid #444;
+    max-height: 90vh;
 }
+
+#next-piece {
+    display: block;
+    width: 120px;
+    height: 120px;
+    max-height: none;
+}
+
 .panel h1 {
-margin-top: 0;
+    margin-top: 0;
 }
+
+.preview-label {
+    margin-bottom: 6px;
+}
+
+button {
+    background: #33334d;
+    border: 1px solid #666;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font: inherit;
+    padding: 8px 12px;
+}
+
+button:hover {
+    background: #44445f;
+}
+
+.touch-controls {
+    display: none;
+}
+
 .help {
-color: #aaa;
-line-height: 1.6;
+    color: #aaa;
+    line-height: 1.6;
+}
+
+/* MOBILE CONTROLS */
+@media (max-width: 700px), (pointer: coarse) {
+
+    body {
+        align-items: flex-start;
+        min-height: 100dvh;
+    }
+
+    .game {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    canvas#board {
+        width: min(300px, calc(100vw - 32px));
+        height: auto;
+    }
+
+    .panel {
+        width: min(300px, calc(100vw - 32px));
+        text-align: center;
+    }
+
+    .panel h1 {
+        margin-bottom: 8px;
+    }
+
+    .panel > p {
+        margin: 5px 0;
+    }
+
+    #next-piece {
+        margin: 0 auto;
+    }
+
+    .help {
+        display: none;
+    }
+
+    .touch-controls {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        margin-top: 18px;
+        width: 100%;
+    }
+
+    .touch-dpad {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        width: 100%;
+    }
+
+    .touch-controls button {
+        min-width: 0;
+        width: 100%;
+        min-height: 68px;
+        font-size: 1.4rem;
+        font-weight: bold;
+        border-radius: 12px;
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .touch-controls > button {
+        max-width: 220px;
+    }
+
+    .touch-controls button:active {
+        background: #2878db;
+        transform: scale(0.96);
+    }
 }
