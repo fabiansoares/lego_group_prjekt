@@ -1,36 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BrickDrop</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrickDrop</title>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<main class="game">
-<canvas id="board" width="300" height="600"></canvas>
-<aside class="panel">
-<h1>BrickDrop</h1>
-<p>Score: <span id="score">0</span></p>
-<p>Lines: <span id="lines">0</span></p>
-<p>Level: <span id="level">1</span></p>
-<p>Best: <span id="best-score">0</span></p>
-<p class="preview-label">Next piece:</p>
-<canvas id="next-piece" width="120" height="120" aria-label="Next piece preview"></canvas>
-<button id="sound-toggle" type="button" aria-pressed="false">Mute sounds</button>
-<p id="message"></p>
-<p class="help">← → move<br>↑ rotate<br>↓ move down<br>Space drop</p>
-<div class="touch-controls" aria-label="Touch controls">
-<button type="button" data-action="rotate" aria-label="Rotate piece">Rotate</button>
-<div class="touch-dpad">
-<button type="button" data-action="left" aria-label="Move left">←</button>
-<button type="button" data-action="down" aria-label="Move down">↓</button>
-<button type="button" data-action="right" aria-label="Move right">→</button>
-</div>
-<button type="button" data-action="drop" aria-label="Drop piece">Drop</button>
-</div>
-</aside>
-</main>
-<script src="game.js"></script>
+
+    <main class="game">
+
+        <canvas id="board" width="300" height="600"></canvas>
+
+        <section class="panel">
+
+            <h1>BrickDrop</h1>
+
+            <p>Score: <span id="score">0</span></p>
+            <p>Lines: <span id="lines">0</span></p>
+            <p>Level: <span id="level">1</span></p>
+            <p>Best: <span id="best-score">0</span></p>
+
+            <h3 class="preview-label">Next Piece</h3>
+            <canvas id="next-piece" width="120" height="120"></canvas>
+
+            <button id="sound-toggle" type="button">
+                Mute sounds
+            </button>
+
+            <p id="message"></p>
+
+            <div class="touch-controls" aria-label="Touch controls">
+
+                <button type="button" data-action="rotate">Rotate</button>
+
+                <div class="touch-dpad">
+                    <button type="button" data-action="left">←</button>
+                    <button type="button" data-action="down">↓</button>
+                    <button type="button" data-action="right">→</button>
+                </div>
+
+                <button type="button" data-action="drop">Drop</button>
+
+            </div>
+
+            <p class="help">
+                Arrow keys: Move<br>
+                Up arrow: Rotate<br>
+                Space: Drop<br>
+                P: Pause
+            </p>
+
+        </section>
+
+    </main>
+
+    <script src="game.js"></script>
+
 </body>
 </html>

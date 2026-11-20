@@ -24,8 +24,7 @@ function createBoard() {
 return Array.from({ length: ROWS }, () => Array(COLS).fill(0));
 }
 let board = createBoard();
-// Some example bricks on the bottom rows, so you can see how the matrix
-works
+// Some example bricks on the board, to show how it the matrix works
 const R = "#ff3b3b", B = "#3d6bff", G = "#33cc33";
 board[18] = [0, R, 0, 0, 0, B, 0, 0, G, 0];
 board[19] = [R, R, 0, B, B, B, 0, G, G, 0];
