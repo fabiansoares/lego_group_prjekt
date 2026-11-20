@@ -2,6 +2,8 @@
 const COLS = 10; // board width in blocks
 const ROWS = 20; // board height in blocks
 const BLOCK = 30; // size of one block in pixels
+const START_COLUMN = 4;
+const START_ROW = 0;
 const canvas = document.getElementById("board");
 const ctx = canvas.getContext("2d");
 // ===== The pieces =====
@@ -24,25 +26,22 @@ function createBoard() {
 return Array.from({ length: ROWS }, () => Array(COLS).fill(0));
 }
 let board = createBoard();
-// Some example bricks on the bottom rows, so you can see how the matrix
-works
+// Some example bricks on the bottom rows, so you can see how the matrix works.
 const R = "#ff3b3b", B = "#3d6bff", G = "#33cc33";
 board[18] = [0, R, 0, 0, 0, B, 0, 0, G, 0];
 board[19] = [R, R, 0, B, B, B, 0, G, G, 0];
 // ===== The falling piece =====
-// Which shape it is, its color, and where it is on the board (column x, row
-y)
+// Which shape it is, its color, and where it is on the board (column x, row y).
 let piece = {
 shape: SHAPES[2], // the T piece
 color: COLORS[2],
-x: 4,
-y: 0,
+x: START_COLUMN,
+y: START_ROW,
 };
 // ===== Drawing =====
 function drawBlock(x, y, color) {
 ctx.fillStyle = color;
-ctx.fillRect(x * BLOCK, y * BLOCK, BLOCK - 1, BLOCK - 1); // -1 leaves a
-small gap
+ctx.fillRect(x * BLOCK, y * BLOCK, BLOCK - 1, BLOCK - 1); // -1 leaves a small gap.
 }
 function draw() {
 ctx.clearRect(0, 0, canvas.width, canvas.height);
